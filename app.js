@@ -205,30 +205,30 @@ class Blockchain {
 // const keystoreFilename = wallet.getV3Filename();
 // const publicKey = wallet.getPublicKeyString();
 
-// const address = wallet.getAddressString();
- const myKey=ec.keyFromPrivate('bffe98de4ffdc49d83c57925528f95996e5836ad8677bad237c72db5a8284e40');
- const public=myKey.getPublic('hex');
+//const address = wallet.getAddressString();
+//  const myKey=ec.keyFromPrivate('bffe98de4ffdc49d83c57925528f95996e5836ad8677bad237c72db5a8284e40');
+//  const public=myKey.getPublic('hex');
  
 
 
- let bin =new Blockchain();
- const trans1=new Transaction(public,'b',10);
- trans1.signTransaction(myKey);
- bin.addTransaction(trans1);
- const trans2=new Transaction(public,'c',20);
- trans2.signTransaction(myKey);
- bin.addTransaction(trans2);
-//  const trans2=new Transaction(public,'c',400);
+//  let bin =new Blockchain();
+//  const trans1=new Transaction(public,'b',10);
+//  trans1.signTransaction(myKey);
+//  bin.addTransaction(trans1);
+//  const trans2=new Transaction(public,'c',20);
 //  trans2.signTransaction(myKey);
 //  bin.addTransaction(trans2);
- bin.minePendingTransactions('c');
+// //  const trans2=new Transaction(public,'c',400);
+// //  trans2.signTransaction(myKey);
+// //  bin.addTransaction(trans2);
+//  bin.minePendingTransactions('c');
  
  
- console.log('tiền của a sau ck :',bin.getBalanceOfAddress(public));
- console.log('tiền của b sau ck :',bin.getBalanceOfAddress('b'));
- console.log('tiền của c sau ck :',bin.getBalanceOfAddress('c'));
- var transHistory=bin.getAllTransactionsForWallet(public);
- for(let i of transHistory) console.log(i,'\n');
+//  console.log('tiền của a sau ck :',bin.getBalanceOfAddress(public));
+//  console.log('tiền của b sau ck :',bin.getBalanceOfAddress('b'));
+//  console.log('tiền của c sau ck :',bin.getBalanceOfAddress('c'));
+//  var transHistory=bin.getAllTransactionsForWallet(public);
+//  for(let i of transHistory) console.log(i,'\n');
 //--------------------------------------------------------------------------------------------------
 
 // var privateKey='061ce8b95ca5fd6f55cd97ac60817777bdf64f1670e903758ce53efc32c3dffeb';
@@ -253,6 +253,35 @@ class Blockchain {
 app.get('/', function (req, res) {
   res.send('Hello World!');
 });
+app.get('/createWallet/password',function(req,res){
+ 
+  const accountPassword = req.query.x;
+  var key=Wallet.generate(accountPassword);
+  var privateKey=key._privKey;
+  var wallet=Wallet.fromPrivateKey(privateKey);
+  privateKey=privateKey.toString('hex');
+
+
+  res.json(privateKey);
+
+})
+
+app.get('/transaction',function(req,res){
+  const EC = require('elliptic').ec;
+const ec = new EC('secp256k1');
+  const privateKey= req.query.pri;
+  const userAddress=req.query.useradd;
+  const amount=+req.query.amount;
+  const myKey=ec.keyFromPrivate(privateKey);
+ const public=myKey.getPublic('hex');
+ let bin =new Blockchain();
+ const trans1=new Transaction(public,userAddress,amount);
+ trans1.signTransaction(myKey);
+ bin.addTransaction(trans1);
+ bin.minePendingTransactions('system');
+ const a=bin.getAllTransactionsForWallet(public);
+ res.json(a);
+})
 
 app.listen(3000, function () {
   console.log('Example app listening on port 3000!');
